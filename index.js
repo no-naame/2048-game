@@ -1,3 +1,4 @@
+let totalScore = 0
 function createBoard() {
     const gridContainer = document.querySelector(".grid");
     for (let i = 0; i < 16; i++){
@@ -115,6 +116,8 @@ function combineArrayLeft(values){
     while (i<4){
         if (values[i-1]==values[i]){
             values[i-1]*=2
+            totalScore += (values[i]*2)
+            document.querySelector("#score").textContent = totalScore
             values[i]=0
         }
         i++
@@ -128,6 +131,8 @@ function combineArrayRight(values){
     while (i>0){
         if (values[i]==values[i-1]){
             values[i]*=2
+            totalScore += (values[i]*2)
+            document.querySelector("#score").textContent = totalScore
             values[i-1]=0
         }
         i--
@@ -150,5 +155,117 @@ function keyUpHandler(e){
             break;
     }
     generate();
+
+    
+    if (checkForWin()){
+        document.body.removeEventListener('keyup', keyUpHandler);
+        document.querySelector('#result').textContent = "YOU WIN!"
+    }
+    else if (isGameOver()){
+        document.body.removeEventListener('keyup', keyUpHandler);
+        document.querySelector('#result').innerText = "Game Over"
+    }
 }
 document.body.addEventListener("keyup",keyUpHandler)
+
+
+function isGameOver(){
+    let allBlocks = document.querySelectorAll(".grid >div")
+    let filteredBlocks = [...allBlocks].filter((a)=>a.textContent==0)
+    if (filteredBlocks.length !=0){
+        return false
+    }
+    for (let rowNumber of [1,2,3,4]){
+        let rowValues = []
+        for (let i=4*(rowNumber-1);i<4*rowNumber;i++){
+            rowValues.push(Number(document.querySelector(`#id_${i}`).textContent))
+            if (rowValues.length>1 && rowValues[i-4]==rowValues[i%4-1]){
+                return false
+            }
+        }
+    }
+
+    for (let colNumber of [1, 2, 3, 4]){
+        let colValues = []
+        let count = 0
+        for (let i = (colNumber - 1); i < 16; i+=4){
+            colValues.push(Number(document.querySelector(`#id_${i}`).textContent))
+            if (colValues.length > 1 && (colValues[count] == colValues[count - 1])){
+                return false
+            }
+        count++
+        }
+    }
+    return true
+            
+}
+function checkForWin(){
+    let allBlocks = document.querySelectorAll('.grid > div') 
+    let winningBlocks = Array.from(allBlocks).filter((a) => a.textContent == 2048)
+    return winningBlocks.length != 0
+}
+document.querySelector('#restart-button').addEventListener('click', () => {
+    document.querySelector('.grid').innerHTML = ''
+    totalScore = 0
+    document.querySelector("#score").textContent = totalScore
+    document.querySelector('#result').innerText = "Join the numbers and get to the 2048 tile!"
+    createBoard()
+    generate()
+    generate()
+    document.body.addEventListener('keyup', keyUpHandler);
+})
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+document.addEventListener('touchstart', handleTouchStart, false);
+document.addEventListener('touchmove', handleTouchMove, false);
+
+function handleTouchStart(event) {
+    touchStartX = event.touches[0].clientX;
+    touchStartY = event.touches[0].clientY;
+}
+
+function handleTouchMove(event) {
+    if (!touchStartX || !touchStartY) {
+        return;
+    }
+
+    touchEndX = event.touches[0].clientX;
+    touchEndY = event.touches[0].clientY;
+
+    let deltaX = touchEndX - touchStartX;
+    let deltaY = touchEndY - touchStartY;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX > 0) {
+            shiftRight();
+        } else {
+            shiftLeft();
+        }
+    } else {
+        if (deltaY > 0) {
+            shiftDown();
+        } else {
+            shiftUp();
+        }
+    }
+
+    touchStartX = 0;
+    touchStartY = 0;
+    touchEndX = 0;
+    touchEndY = 0;
+
+    generate();
+
+    if (checkForWin()) {
+        document.body.removeEventListener('touchstart', handleTouchStart);
+        document.body.removeEventListener('touchmove', handleTouchMove);
+        document.querySelector('#result').textContent = "YOU WIN!";
+    } else if (isGameOver()) {
+        document.body.removeEventListener('touchstart', handleTouchStart);
+        document.body.removeEventListener('touchmove', handleTouchMove);
+        document.querySelector('#result').textContent = "Game Over";
+    }
+}

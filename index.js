@@ -4,7 +4,7 @@ function createBoard() {
     for (let i = 0; i < 16; i++){
         let tile = document.createElement('div');
         tile.setAttribute('id', `id_${i}`);
-        tile.textContent = "";
+        tile.textContent = 0;
         gridContainer.appendChild(tile);
     }
 }

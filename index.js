@@ -13,7 +13,7 @@ function generate(){
     let numArray = [2,2,2,2,2,2,2,2,2,4];
     let num = numArray[Math.floor(Math.random()*numArray.length)]
     let allBlocks = document.querySelectorAll('.grid>div');
-    let filteredBlocks = [...allBlocks].filter((a) => a.textContent == 0);
+    let filteredBlocks = [...allBlocks].filter((a) => a.textContent == "");
     if (filteredBlocks == 0){
         return;
     }
